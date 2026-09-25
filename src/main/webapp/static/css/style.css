@@ -1,0 +1,25 @@
+/* Custom CSS for Location Weather App */
+:root {
+    --primary-color: #0d6efd;
+    --secondary-color: #6c757d;
+}
+
+body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+footer {
+    margin-top: auto;
+}
+
+.weather-card {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.weather-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+}
