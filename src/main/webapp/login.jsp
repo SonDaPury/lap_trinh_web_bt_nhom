@@ -1,0 +1,125 @@
+<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+<%@ taglib prefix="c" uri="jakarta.tags.core" %>
+
+<%-- Nếu đã đăng nhập rồi thì chuyển thẳng vào trang Admin Dashboard --%>
+<c:if test="${not empty sessionScope.adminUser}">
+    <c:redirect url="/admin/dashboard" />
+</c:if>
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cổng Đăng Nhập Quản Trị - VietWeather</title>
+
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <!-- Custom Bright Stylesheet -->
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/static/css/style.css">
+
+    <style>
+        body {
+          min-height: 100vh;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+        .login-container {
+          max-width: 440px;
+          width: 100%;
+          padding: 1.5rem;
+          position: relative;
+          z-index: 1;
+        }
+    </style>
+</head>
+<body>
+
+<!-- Ambient Light Orbs -->
+<div class="ambient-glow-1"></div>
+<div class="ambient-glow-2"></div>
+
+<div class="login-container">
+    <div class="bento-card p-4 p-md-5 bg-white shadow-lg border-0">
+
+        <!-- Brand Logo -->
+        <div class="text-center mb-4">
+            <a href="${pageContext.request.contextPath}/home" class="d-inline-flex align-items-center text-decoration-none mb-3">
+                <div class="p-2 rounded-3 me-2 d-flex align-items-center justify-content-center"
+                     style="background: #e0f2fe; border: 1px solid #bae6fd;">
+                    <i class="bi bi-cloud-sun-fill text-warning fs-3"></i>
+                </div>
+                <span class="fs-3 navbar-brand-logo">Viet<span class="text-dark">Weather</span></span>
+            </a>
+            <h4 class="fw-bold text-dark mb-1">Cổng Quản Trị Hệ Thống</h4>
+            <p class="text-muted small">Xác thực tài khoản Admin quản lý danh mục địa phương</p>
+        </div>
+
+        <!-- Alert Message (Hiển thị khi Controller gửi lỗi về hoặc JS bắt lỗi) -->
+        <div id="loginAlert" class="alert alert-danger small ${not empty errorMessage ? '' : 'd-none'} rounded-3 mb-4" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-1"></i>
+            <span id="loginAlertText"><c:out value="${errorMessage}" /></span>
+        </div>
+
+        <!-- Login Form -->
+        <form id="loginForm" action="${pageContext.request.contextPath}/admin/login" method="POST">
+            <div class="mb-3">
+                <label for="usernameInput" class="form-label small fw-bold text-secondary">Tên đăng nhập (Username)</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-light border-end-0 rounded-start-pill text-muted">
+                        <i class="bi bi-person-fill"></i>
+                    </span>
+                    <input type="text" class="form-control bg-light text-dark border-start-0 rounded-end-pill py-2"
+                           id="usernameInput" name="username" placeholder="Nhập username (admin)"
+                           value="${not empty param.username ? param.username : 'admin'}" required>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label for="passwordInput" class="form-label small fw-bold text-secondary">Mật khẩu (Password)</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-light border-end-0 rounded-start-pill text-muted">
+                        <i class="bi bi-lock-fill"></i>
+                    </span>
+                    <input type="password" class="form-control bg-light text-dark border-start-0 rounded-end-pill py-2"
+                           id="passwordInput" name="password" placeholder="Nhập mật khẩu (123456)" value="123456" required>
+                </div>
+            </div>
+
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="rememberMe" name="rememberMe" checked>
+                    <label class="form-check-label small text-muted" for="rememberMe">
+                        Ghi nhớ phiên
+                    </label>
+                </div>
+                <span class="badge rounded-pill px-2 py-1 small"
+                      style="background: #e0f2fe; color: #0284c7; border: 1px solid #bae6fd;">
+                    admin / 123456
+                </span>
+            </div>
+
+            <button type="submit" class="btn btn-spotlight-action w-100 rounded-pill py-2 fw-bold mb-3 shadow-sm">
+                <i class="bi bi-box-arrow-in-right me-1"></i> Đăng nhập hệ thống
+            </button>
+
+            <a href="${pageContext.request.contextPath}/home"
+               class="btn btn-glass-pill w-100 justify-content-center py-2 text-center small text-secondary text-decoration-none">
+                <i class="bi bi-arrow-left me-1"></i> Quay lại Trang chủ
+            </a>
+        </form>
+
+    </div>
+
+    <!-- Footer note -->
+    <div class="text-center mt-4 text-muted small">
+        © 2026 VietWeather - Phân hệ bảo mật môn Lập trình Web PTIT
+    </div>
+</div>
+
+<script src="${pageContext.request.contextPath}/static/js/weather-api.js"></script>
+</body>
+</html>

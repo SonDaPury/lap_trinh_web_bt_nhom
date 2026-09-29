@@ -1,0 +1,395 @@
+<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+<%@ taglib prefix="c" uri="jakarta.tags.core" %>
+<%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
+
+<%-- Kiểm tra xác thực Admin: Nếu chưa đăng nhập thì chuyển hướng về login --%>
+<c:if test="${empty sessionScope.adminUser}">
+    <c:redirect url="/admin/login"/>
+</c:if>
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bảng Quản Trị Hệ Thống - VietWeather</title>
+
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <!-- Custom Bright Stylesheet -->
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/static/css/style.css">
+</head>
+<body>
+
+<!-- Ambient Light Orbs -->
+<div class="ambient-glow-1"></div>
+<div class="ambient-glow-2"></div>
+
+<!-- ================= TOP NAVBAR ================= -->
+<nav class="navbar navbar-expand-lg navbar-floating py-3">
+    <div class="container-fluid px-lg-5">
+        <a class="navbar-brand d-flex align-items-center" href="${pageContext.request.contextPath}/admin/dashboard">
+            <div class="p-2 rounded-3 me-2 d-flex align-items-center justify-content-center"
+                 style="background: #e0f2fe; border: 1px solid #bae6fd;">
+                <i class="bi bi-shield-lock-fill text-warning fs-4"></i>
+            </div>
+            <span class="fs-4 navbar-brand-logo">VietWeather <span
+                    class="badge bg-primary-subtle text-primary border border-primary-subtle fs-6 fw-normal rounded-pill ms-1">Admin Panel</span></span>
+        </a>
+
+        <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#adminNavbar">
+            <i class="bi bi-list fs-2 text-dark"></i>
+        </button>
+
+        <div class="collapse navbar-collapse" id="adminNavbar">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-4 gap-1">
+                <li class="nav-item">
+                    <a class="nav-link nav-link-custom active"
+                       href="${pageContext.request.contextPath}/admin/dashboard">
+                        <i class="bi bi-speedometer2 me-1"></i> Dashboard &amp; Địa phương
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link nav-link-custom" href="${pageContext.request.contextPath}/home" target="_blank">
+                        <i class="bi bi-box-arrow-up-right me-1 text-primary"></i> Xem trang Client
+                    </a>
+                </li>
+            </ul>
+
+            <div class="d-flex align-items-center gap-3">
+                <div class="d-flex align-items-center gap-2 px-3 py-1 rounded-pill bg-light border">
+                    <span class="badge bg-success rounded-circle p-1"></span>
+                    <div class="small text-dark fw-bold" id="adminNameDisplay">
+                        <c:out value="${sessionScope.adminUser.fullName}" default="Quản Trị Viên"/>
+                    </div>
+                </div>
+                <a href="${pageContext.request.contextPath}/admin/logout"
+                   class="btn btn-outline-danger rounded-pill btn-sm py-2 px-3 fw-semibold text-decoration-none"
+                   id="logoutBtn">
+                    <i class="bi bi-box-arrow-right me-1"></i> Đăng xuất
+                </a>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<!-- ================= MAIN ADMIN CONTENT ================= -->
+<main class="container-fluid px-lg-5 my-4 position-relative" style="z-index: 1;">
+
+    <!-- KPI STATISTICS SECTION (UC05) -->
+    <section class="mb-4">
+        <div class="row g-3">
+            <!-- Tổng số địa điểm -->
+            <div class="col-12 col-sm-6 col-xl-3">
+                <div class="bento-card p-4 d-flex align-items-center justify-content-between bg-white shadow-sm">
+                    <div>
+                        <span class="text-secondary small fw-bold text-uppercase">Tổng địa phương</span>
+                        <h2 class="display-6 fw-bold mb-0 text-dark" id="statTotalLocations">
+                            ${not empty totalLocations ? totalLocations : 0}
+                        </h2>
+                        <span class="text-muted small">CSDL MySQL</span>
+                    </div>
+                    <div class="p-3 rounded-4 fs-2 d-flex align-items-center justify-content-center"
+                         style="background: #e0f2fe; color: #0284c7; border: 1px solid #bae6fd;">
+                        <i class="bi bi-geo-alt-fill"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Miền Bắc -->
+            <div class="col-12 col-sm-6 col-xl-3">
+                <div class="bento-card p-4 d-flex align-items-center justify-content-between bg-white shadow-sm">
+                    <div>
+                        <span class="text-secondary small fw-bold text-uppercase">Khu vực Miền Bắc</span>
+                        <h2 class="display-6 fw-bold mb-0 text-primary" id="statBac">
+                            ${not empty countBac ? countBac : 0}
+                        </h2>
+                        <span class="text-muted small">Tỉnh / Thành phố</span>
+                    </div>
+                    <div class="p-3 rounded-4 fs-2 d-flex align-items-center justify-content-center"
+                         style="background: #e0f2fe; color: #0284c7; border: 1px solid #bae6fd;">
+                        <i class="bi bi-compass"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Miền Trung -->
+            <div class="col-12 col-sm-6 col-xl-3">
+                <div class="bento-card p-4 d-flex align-items-center justify-content-between bg-white shadow-sm">
+                    <div>
+                        <span class="text-secondary small fw-bold text-uppercase">Khu vực Miền Trung</span>
+                        <h2 class="display-6 fw-bold mb-0 text-warning" id="statTrung">
+                            ${not empty countTrung ? countTrung : 0}
+                        </h2>
+                        <span class="text-muted small">Tỉnh / Thành phố</span>
+                    </div>
+                    <div class="p-3 rounded-4 fs-2 d-flex align-items-center justify-content-center"
+                         style="background: #fef3c7; color: #d97706; border: 1px solid #fde68a;">
+                        <i class="bi bi-sun-fill"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Miền Nam -->
+            <div class="col-12 col-sm-6 col-xl-3">
+                <div class="bento-card p-4 d-flex align-items-center justify-content-between bg-white shadow-sm">
+                    <div>
+                        <span class="text-secondary small fw-bold text-uppercase">Khu vực Miền Nam</span>
+                        <h2 class="display-6 fw-bold mb-0 text-success" id="statNam">
+                            ${not empty countNam ? countNam : 0}
+                        </h2>
+                        <span class="text-muted small">Tỉnh / Thành phố</span>
+                    </div>
+                    <div class="p-3 rounded-4 fs-2 d-flex align-items-center justify-content-center"
+                         style="background: #dcfce7; color: #16a34a; border: 1px solid #bbf7d0;">
+                        <i class="bi bi-cloud-rain-fill"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- CRUD LOCATIONS MANAGEMENT TABLE SECTION (UC04) -->
+    <section class="bento-card p-4 p-md-5 mb-5 bg-white shadow-sm">
+
+        <!-- Toolbar Header -->
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+            <div>
+                <h4 class="fw-bold text-dark mb-1">
+                    <i class="bi bi-table text-primary me-2"></i>Danh Mục Địa Phương &amp; Toạ Độ (Locations CRUD)
+                </h4>
+                <p class="text-muted small mb-0">Quản lý thêm, sửa, xóa tỉnh/thành phố và cấu hình toạ độ gọi API
+                    Open-Meteo</p>
+            </div>
+
+            <div class="d-flex flex-wrap align-items-center gap-2">
+                <button class="btn btn-outline-success rounded-pill py-2 px-3 fw-semibold small" id="exportCsvBtn"
+                        title="Tải về file Excel/CSV">
+                    <i class="bi bi-file-earmark-excel me-1"></i> Xuất CSV
+                </button>
+                <button class="btn btn-glass-pill py-2 px-3 fw-semibold small" id="resetDataBtn"
+                        title="Khôi phục danh sách mẫu">
+                    <i class="bi bi-arrow-counterclockwise me-1"></i> Khôi phục mẫu
+                </button>
+                <button class="btn btn-spotlight-action py-2 px-3 fw-semibold" data-bs-toggle="modal"
+                        data-bs-target="#locationModal" onclick="openAddModal()">
+                    <i class="bi bi-plus-lg me-1"></i> Thêm địa phương mới
+                </button>
+            </div>
+        </div>
+
+        <!-- Filters Toolbar -->
+        <div class="row g-2 mb-4">
+            <div class="col-md-6 col-lg-4">
+                <div class="input-group">
+                    <span class="input-group-text bg-light border-end-0 text-muted"><i class="bi bi-search"></i></span>
+                    <input type="text" id="adminSearchInput" class="form-control bg-light border-start-0"
+                           placeholder="Tìm theo tên thành phố...">
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <select id="adminRegionFilter" class="form-select bg-light border">
+                    <option value="ALL">-- Tất cả khu vực --</option>
+                    <option value="Bắc">Miền Bắc</option>
+                    <option value="Trung">Miền Trung</option>
+                    <option value="Nam">Miền Nam</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Responsive Table -->
+        <div class="table-responsive">
+            <table class="table admin-table-light align-middle">
+                <thead>
+                <tr>
+                    <th scope="col" style="width: 70px;">ID</th>
+                    <th scope="col">Tỉnh / Thành phố</th>
+                    <th scope="col">Vùng miền</th>
+                    <th scope="col">Vĩ độ (Lat)</th>
+                    <th scope="col">Kinh độ (Long)</th>
+                    <th scope="col" class="text-center">Trang chủ</th>
+                    <th scope="col" class="text-end" style="width: 160px;">Thao tác</th>
+                </tr>
+                </thead>
+                <tbody id="locationTableBody">
+                <c:choose>
+                    <c:when test="${not empty locations}">
+                        <c:forEach var="loc" items="${locations}">
+                            <tr>
+                                <td class="fw-semibold text-muted">#${loc.locationId}</td>
+                                <td class="fw-bold text-dark">${loc.cityName}</td>
+                                <td>
+                          <span class="badge ${loc.regionName == 'Miền Bắc' || loc.regionName == 'Bắc' ? 'bg-primary-subtle text-primary' : (loc.regionName == 'Miền Trung' || loc.regionName == 'Trung' ? 'bg-warning-subtle text-warning' : 'bg-success-subtle text-success')}">
+                            ${loc.regionName}
+                          </span>
+                                </td>
+                                <td>${loc.latitude}</td>
+                                <td>${loc.longitude}</td>
+                                <td class="text-center">
+                                    <c:choose>
+                                        <c:when test="${loc.featured}">
+                                            <span class="badge bg-success rounded-pill px-2 py-1"><i
+                                                    class="bi bi-check-lg"></i> Có</span>
+                                        </c:when>
+                                        <c:otherwise>
+                                            <span class="badge bg-light text-muted border rounded-pill px-2 py-1">Không</span>
+                                        </c:otherwise>
+                                    </c:choose>
+                                </td>
+                                <td class="text-end">
+                                    <button class="btn btn-sm btn-outline-primary me-1"
+                                            onclick="openEditModal(${loc.locationId}, '${loc.cityName}', '${loc.regionName}', ${loc.latitude}, ${loc.longitude}, ${loc.featured})"
+                                            title="Chỉnh sửa">
+                                        <i class="bi bi-pencil-fill"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-danger"
+                                            onclick="openDeleteModal(${loc.locationId}, '${loc.cityName}')"
+                                            title="Xóa địa phương">
+                                        <i class="bi bi-trash-fill"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        </c:forEach>
+                    </c:when>
+                    <c:otherwise>
+                        <!-- Giữ nguyên chỗ trống cho JavaScript render nếu nạp danh sách bằng API/Store -->
+                    </c:otherwise>
+                </c:choose>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Table Empty Alert -->
+        <div id="tableEmptyAlert"
+             class="alert alert-info text-center p-4 ${empty locations ? '' : 'd-none'} mt-2 rounded-3">
+            <i class="bi bi-info-circle fs-3 text-primary mb-2 d-block"></i>
+            Không tìm thấy địa phương nào khớp với bộ lọc. Hãy bấm nút "Thêm địa phương mới"!
+        </div>
+    </section>
+
+</main>
+
+<!-- ================= ADD / EDIT LOCATION MODAL ================= -->
+<div class="modal fade" id="locationModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content modal-content-glass border-0">
+
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold text-dark" id="modalTitle">Thêm địa phương mới</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <form id="locationForm" action="${pageContext.request.contextPath}/admin/location" method="POST">
+                <div class="modal-body py-4">
+                    <input type="hidden" id="locationId" name="locationId">
+                    <input type="hidden" id="actionType" name="action" value="create">
+
+                    <!-- Tên thành phố -->
+                    <div class="mb-3">
+                        <label for="cityNameInput" class="form-label small fw-bold text-secondary">Tên Tỉnh / Thành phố
+                            <span class="text-danger">*</span></label>
+                        <div class="input-group">
+                            <input type="text" class="form-control" id="cityNameInput" name="cityName"
+                                   placeholder="Ví dụ: Hạ Long, Vũng Tàu, Phú Quốc..." required>
+                            <button type="button" class="btn btn-outline-primary px-3" id="autoGeocodeBtn"
+                                    title="Tự động tìm kinh độ/vĩ độ qua API">
+                                <i class="bi bi-magic me-1"></i> Tự lấy toạ độ
+                            </button>
+                        </div>
+                        <div class="form-text text-muted small mt-2" id="geocodeHelperText">
+                            <i class="bi bi-lightbulb text-warning me-1"></i> Bấm "Tự lấy toạ độ" để tự động điền kinh
+                            độ/vĩ độ chuẩn qua Geocoding.
+                        </div>
+                    </div>
+
+                    <!-- Vùng miền -->
+                    <div class="mb-3">
+                        <label for="regionSelect" class="form-label small fw-bold text-secondary">Vùng miền <span
+                                class="text-danger">*</span></label>
+                        <select class="form-select" id="regionSelect" name="regionName" required>
+                            <option value="Bắc">Miền Bắc</option>
+                            <option value="Trung">Miền Trung</option>
+                            <option value="Nam">Miền Nam</option>
+                        </select>
+                    </div>
+
+                    <!-- Tọa độ: Vĩ độ & Kinh độ -->
+                    <div class="row g-2 mb-3">
+                        <div class="col-6">
+                            <label for="latitudeInput" class="form-label small fw-bold text-secondary">Vĩ độ (Latitude)
+                                <span class="text-danger">*</span></label>
+                            <input type="number" step="0.0001" class="form-control" id="latitudeInput" name="latitude"
+                                   placeholder="21.0285" required>
+                        </div>
+                        <div class="col-6">
+                            <label for="longitudeInput" class="form-label small fw-bold text-secondary">Kinh độ
+                                (Longitude) <span class="text-danger">*</span></label>
+                            <input type="number" step="0.0001" class="form-control" id="longitudeInput" name="longitude"
+                                   placeholder="105.8542" required>
+                        </div>
+                    </div>
+
+                    <!-- Nổi bật ở trang chủ -->
+                    <div class="form-check form-switch mt-3">
+                        <input class="form-check-input" type="checkbox" id="isFeaturedSwitch" name="isFeatured"
+                               value="true" checked>
+                        <label class="form-check-label fw-semibold text-dark small" for="isFeaturedSwitch">
+                            Hiển thị nổi bật ngoài trang chủ (is_featured = 1)
+                        </label>
+                    </div>
+
+                </div>
+
+                <div class="modal-footer border-0 pt-0">
+                    <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-spotlight-action px-4 py-2" id="saveLocationBtn">
+                        Lưu dữ liệu
+                    </button>
+                </div>
+            </form>
+
+        </div>
+    </div>
+</div>
+
+<!-- ================= DELETE CONFIRMATION MODAL ================= -->
+<div class="modal fade" id="deleteConfirmModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content modal-content-glass border-0 text-center p-3">
+            <div class="modal-body">
+                <div class="p-3 rounded-circle d-inline-flex mb-2" style="background: #fee2e2; color: #ef4444;">
+                    <i class="bi bi-trash3-fill fs-2"></i>
+                </div>
+                <h5 class="fw-bold text-dark mt-2 mb-2">Xác nhận xóa?</h5>
+                <p class="text-muted small mb-0" id="deleteModalCityText">Bạn có chắc chắn muốn xóa địa phương này?</p>
+            </div>
+            <div class="d-flex justify-content-center gap-2 mt-3">
+                <button type="button" class="btn btn-light rounded-pill px-3" data-bs-dismiss="modal">Hủy</button>
+                <button type="button" class="btn btn-danger rounded-pill px-4 fw-bold" id="confirmDeleteBtn">Xóa ngay
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ================= TOAST NOTIFICATION ================= -->
+<div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 1080;">
+    <div id="adminToast" class="toast align-items-center text-bg-success border-0 rounded-4 shadow-lg" role="alert">
+        <div class="d-flex">
+            <div class="toast-body fw-semibold text-white" id="toastMessage">
+                Thao tác thành công!
+            </div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+        </div>
+    </div>
+</div>
+
+<!-- Bootstrap JS Bundle -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<!-- Weather API & CRUD Store -->
+<script src="${pageContext.request.contextPath}/static/js/weather-api.js"></script>
+<!-- Admin CRUD JS -->
+<script src="${pageContext.request.contextPath}/static/js/admin.js"></script>
+</body>
+</html>

@@ -38,7 +38,7 @@ public class DBContext {
         port = getEnvOrDefault("DB_PORT", props.getProperty("db.port", "3306"));
         dbName = getEnvOrDefault("DB_NAME", props.getProperty("db.name", "location_weather_db"));
         user = getEnvOrDefault("DB_USER", props.getProperty("db.user", "root"));
-        password = getEnvOrDefault("DB_PASSWORD", props.getProperty("db.password", "12345678"));
+        password = getEnvOrDefault("DB_PASSWORD", props.getProperty("db.password", ""));
         params = props.getProperty("db.params", "?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC&characterEncoding=UTF-8");
 
         try {

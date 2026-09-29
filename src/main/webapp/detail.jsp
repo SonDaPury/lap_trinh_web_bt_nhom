@@ -1,0 +1,241 @@
+<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+<%@ taglib prefix="c" uri="jakarta.tags.core" %>
+<%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chi Tiết Khí Tượng - VietWeather</title>
+
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Custom Bright Stylesheet -->
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/static/css/style.css">
+</head>
+<body>
+
+<!-- Ambient Light Orbs -->
+<div class="ambient-glow-1"></div>
+<div class="ambient-glow-2"></div>
+
+<!-- ================= FLOATING GLASS NAVBAR ================= -->
+<nav class="navbar navbar-expand-lg navbar-floating py-3">
+    <div class="container">
+        <a class="navbar-brand d-flex align-items-center" href="${pageContext.request.contextPath}/home">
+            <div class="p-2 rounded-3 me-2 d-flex align-items-center justify-content-center"
+                 style="background: #e0f2fe; border: 1px solid #bae6fd;">
+                <i class="bi bi-cloud-sun-fill text-warning fs-4"></i>
+            </div>
+            <span class="fs-4 navbar-brand-logo">Viet<span class="text-dark">Weather</span></span>
+        </a>
+
+        <div class="d-flex align-items-center gap-2">
+            <a href="${pageContext.request.contextPath}/home" class="btn btn-glass-pill py-2 px-3 fw-semibold">
+                <i class="bi bi-arrow-left me-1"></i> Trang chủ
+            </a>
+            <c:choose>
+                <c:when test="${not empty sessionScope.adminUser}">
+                    <a href="${pageContext.request.contextPath}/admin/dashboard"
+                       class="btn btn-spotlight-action py-2 px-3 fw-semibold">
+                        <i class="bi bi-speedometer2 me-1"></i> Quản trị
+                    </a>
+                </c:when>
+                <c:otherwise>
+                    <a href="${pageContext.request.contextPath}/admin/login"
+                       class="btn btn-spotlight-action py-2 px-3 fw-semibold">
+                        <i class="bi bi-shield-lock-fill me-1"></i> Quản trị
+                    </a>
+                </c:otherwise>
+            </c:choose>
+        </div>
+    </div>
+</nav>
+
+<!-- ================= MAIN CONTENT (BENTO GRID) ================= -->
+<main class="container my-4 my-md-5 position-relative" style="z-index: 1;">
+
+    <!-- TOP BREADCRUMB & SELECTOR -->
+    <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-3 mb-4">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-0">
+                <li class="breadcrumb-item"><a href="${pageContext.request.contextPath}/home"
+                                               class="text-primary text-decoration-none fw-semibold">Trang chủ</a></li>
+                <li class="breadcrumb-item active text-dark fw-bold" aria-current="page" id="breadcrumbCity">Chi tiết
+                    khí tượng
+                </li>
+            </ol>
+        </nav>
+        <div id="citySelectorDropdown">
+            <!-- Quick city changer -->
+        </div>
+    </div>
+
+    <!-- ROW 1: BENTO WEATHER SPOTLIGHT & 4 KEY METRICS -->
+    <div class="row g-4 mb-4">
+        <!-- Main City Spotlight Widget -->
+        <div class="col-lg-7">
+            <div class="detail-hero-widget h-100 d-flex flex-column justify-content-between">
+                <div>
+                    <div class="d-flex align-items-center gap-2 mb-2">
+                        <span class="badge rounded-pill px-3 py-1 fw-bold bg-white text-primary shadow-sm"
+                              id="detailRegion">Miền --</span>
+                        <span class="text-white-50 small" id="detailCoordinates"><i
+                                class="bi bi-compass me-1"></i>--</span>
+                    </div>
+                    <h1 class="display-5 fw-bold text-white mb-1" id="detailCityName">Đang tải...</h1>
+                    <p class="text-white-50 small mb-3" id="detailUpdateTime">Cập nhật lúc: --:--</p>
+                </div>
+
+                <div class="d-flex flex-column flex-sm-row align-items-sm-center justify-content-between gap-3 my-3">
+                    <div>
+                        <div class="display-2 fw-bold text-white" id="detailTemp" style="letter-spacing: -2px;">--°
+                        </div>
+                        <div class="fs-4 fw-semibold mt-1 text-white" id="detailCondition">--</div>
+                        <div class="text-white-50 mt-1">Cảm giác như <strong class="text-white"
+                                                                             id="detailFeelsLike">--°</strong></div>
+                    </div>
+                    <div class="text-center">
+                        <div id="detailBigIcon" class="pulse-glow" style="font-size: 6rem; line-height: 1;">
+                            <i class="bi bi-cloud-sun text-warning"></i>
+                        </div>
+                        <div class="text-white-50 small mt-2">
+                            Biên độ: <span class="text-white fw-bold" id="detailMinMax">--° / --°</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex align-items-center gap-2 pt-3 border-top"
+                     style="border-color: rgba(255,255,255,0.2) !important;">
+                    <i class="bi bi-broadcast text-white"></i>
+                    <span class="small text-white-50">Mô hình dự báo số: Open-Meteo High-Resolution Model</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4 Key Metrics (2x2 Bento Box Grid) -->
+        <div class="col-lg-5">
+            <div class="row g-3 h-100">
+                <!-- Độ ẩm -->
+                <div class="col-6">
+                    <div class="metric-bento-box shadow-sm">
+                        <div class="metric-label">
+                            <i class="bi bi-droplet-fill text-info"></i> Độ ẩm
+                        </div>
+                        <div class="metric-value text-primary" id="metricHumidity">--%</div>
+                        <div class="text-muted small" id="humidityStatus">Bình thường</div>
+                    </div>
+                </div>
+
+                <!-- Sức gió -->
+                <div class="col-6">
+                    <div class="metric-bento-box shadow-sm">
+                        <div class="metric-label">
+                            <i class="bi bi-wind text-primary"></i> Sức gió
+                        </div>
+                        <div class="metric-value text-dark" id="metricWind">-- km/h</div>
+                        <div class="text-muted small">Gió Đông Nam nhẹ</div>
+                    </div>
+                </div>
+
+                <!-- Tia UV -->
+                <div class="col-6">
+                    <div class="metric-bento-box shadow-sm">
+                        <div class="metric-label">
+                            <i class="bi bi-sun-fill text-warning"></i> Tia UV
+                        </div>
+                        <div class="metric-value text-warning" id="metricUV">--</div>
+                        <div class="text-muted small" id="uvStatus">Mức an toàn</div>
+                    </div>
+                </div>
+
+                <!-- Áp suất -->
+                <div class="col-6">
+                    <div class="metric-bento-box shadow-sm">
+                        <div class="metric-label">
+                            <i class="bi bi-speedometer text-secondary"></i> Áp suất
+                        </div>
+                        <div class="metric-value text-dark" id="metricPressure">-- hPa</div>
+                        <div class="text-muted small">Ổn định</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ROW 2: 24-HOUR HOURLY CHART (CHART.JS) -->
+    <section class="bento-card p-4 p-md-5 mb-4 bg-white shadow-sm">
+        <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-2 mb-4">
+            <div>
+                <h4 class="fw-bold text-dark mb-1">
+                    <i class="bi bi-graph-up-arrow text-primary me-2"></i>Biểu Đồ Nhiệt Độ 24 Giờ Tiếp Theo
+                </h4>
+                <p class="text-muted small mb-0">Biến thiên nhiệt độ chi tiết theo từng khung giờ trong ngày</p>
+            </div>
+            <span class="btn-glass-pill py-1 px-3 small text-primary" style="pointer-events: none;">
+          <i class="bi bi-clock-history me-1"></i> Chu kỳ 24h
+        </span>
+        </div>
+        <div style="height: 280px; position: relative;">
+            <canvas id="hourlyChart"></canvas>
+        </div>
+    </section>
+
+    <!-- ROW 3: 7-DAY FORECAST WITH HORIZONTAL RANGE BARS -->
+    <section class="mb-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h4 class="fw-bold text-dark mb-0">
+                <i class="bi bi-calendar-week text-primary me-2"></i>Dự Báo Xu Hướng 7 Ngày Tới
+            </h4>
+            <small class="text-muted">Dữ liệu chuẩn WMO Code</small>
+        </div>
+
+        <div class="row g-3" id="sevenDayForecastList">
+            <!-- Render via JS with horizontal range bars -->
+        </div>
+    </section>
+
+    <!-- ROW 4: LIFESTYLE ADVICE -->
+    <section class="bento-card p-4 bg-white shadow-sm">
+        <div class="row align-items-center">
+            <div class="col-md-2 text-center mb-3 mb-md-0">
+                <div class="p-3 rounded-circle d-inline-flex" style="background: #e0f2fe; color: #0284c7;">
+                    <i class="bi bi-shield-check fs-1"></i>
+                </div>
+            </div>
+            <div class="col-md-10">
+                <h5 class="fw-bold text-dark mb-1">Khuyến nghị thời tiết &amp; Sức khỏe hôm nay</h5>
+                <p class="text-muted small mb-0" id="lifestyleAdvice">
+                    Đang phân tích dữ liệu khí tượng...
+                </p>
+            </div>
+        </div>
+    </section>
+
+</main>
+
+<!-- ================= FOOTER ================= -->
+<footer class="footer-light py-4 mt-auto position-relative" style="z-index: 1;">
+    <div class="container text-center text-md-between d-flex flex-column flex-md-row justify-content-between align-items-center">
+        <div class="mb-2 mb-md-0 text-muted small">
+            &copy; 2026 <strong class="text-dark">VietWeather</strong> - Bài tập thực hành Lập trình Web PTIT
+        </div>
+        <div class="text-muted small">
+            Dữ liệu theo cấu trúc <a href="https://open-meteo.com" target="_blank"
+                                     class="text-decoration-none text-primary fw-semibold">Open-Meteo</a>
+        </div>
+    </div>
+</footer>
+
+<!-- Bootstrap JS Bundle -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<!-- Weather API & Simulation Module -->
+<script src="${pageContext.request.contextPath}/static/js/weather-api.js"></script>
+<!-- Detail View JS -->
+<script src="${pageContext.request.contextPath}/static/js/detail.js"></script>
+</body>
+</html>

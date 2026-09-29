@@ -9,7 +9,7 @@
 
     <!-- Welcome File List -->
     <welcome-file-list>
-        <welcome-file>index.jsp</welcome-file>
+        <welcome-file>home.jsp</welcome-file>
     </welcome-file-list>
 
     <!-- Character Encoding Filter (UTF-8 for Vietnamese language support) -->

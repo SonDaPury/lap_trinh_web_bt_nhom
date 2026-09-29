@@ -1,7 +1,7 @@
 /**
  * detail.js
- * Logic giao diện Trang chi tiết (detail.html)
- * Phiên bản Bright Daylight (Chart.js thanh thoát & Dải nhiệt độ Apple style)
+ * Logic giao diện Trang chi tiết (detail.jsp)
+ * Tích hợp chuẩn Tomcat 10, MySQL & Open-Meteo REST API
  */
 
 let hourlyChartInstance = null;
@@ -14,17 +14,51 @@ document.addEventListener("DOMContentLoaded", () => {
   setupCityDropdown(locationId);
 });
 
+// Lấy Context Path động của ứng dụng
+function getContextPath() {
+  return window.location.pathname.substring(0, window.location.pathname.indexOf("/", 2)) || "";
+}
+
 // 1. Tải chi tiết thời tiết
 async function loadCityDetail(id) {
-  const loc = getLocationById(id) || getLocationById(1);
-  if (!loc) return;
+  // Ưu tiên đọc thông tin toạ độ được render trực tiếp từ JSP (nếu có thẻ data-location)
+  let loc = null;
+  const serverLocationEl = document.getElementById("serverLocationData");
+
+  if (serverLocationEl) {
+    loc = {
+      cityName: serverLocationEl.dataset.city,
+      region: serverLocationEl.dataset.region,
+      latitude: parseFloat(serverLocationEl.dataset.lat),
+      longitude: parseFloat(serverLocationEl.dataset.lon)
+    };
+  } else if (typeof getLocationById === "function") {
+    // Fallback sang hàm của weather-api.js nếu chạy client-side
+    loc = getLocationById(id) || getLocationById(1);
+  }
+
+  if (!loc || isNaN(loc.latitude) || isNaN(loc.longitude)) return;
 
   document.title = `Thời Tiết ${loc.cityName} - VietWeather`;
-  document.getElementById("breadcrumbCity").textContent = loc.cityName;
-  document.getElementById("detailCityName").textContent = loc.cityName;
-  document.getElementById("detailRegion").textContent = `Miền ${loc.region}`;
-  document.getElementById("detailCoordinates").innerHTML = `<i class="bi bi-compass me-1"></i>Toạ độ: ${loc.latitude.toFixed(4)}°B, ${loc.longitude.toFixed(4)}°Đ`;
-  document.getElementById("detailUpdateTime").textContent = `Cập nhật lúc: ${new Date().toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit" })}`;
+
+  const breadcrumbEl = document.getElementById("breadcrumbCity");
+  if (breadcrumbEl) breadcrumbEl.textContent = loc.cityName;
+
+  const cityNameEl = document.getElementById("detailCityName");
+  if (cityNameEl) cityNameEl.textContent = loc.cityName;
+
+  const regionEl = document.getElementById("detailRegion");
+  if (regionEl) regionEl.textContent = loc.region.startsWith("Miền") ? loc.region : `Miền ${loc.region}`;
+
+  const coordsEl = document.getElementById("detailCoordinates");
+  if (coordsEl) {
+    coordsEl.innerHTML = `<i class="bi bi-compass me-1"></i>Toạ độ: ${loc.latitude.toFixed(4)}°B, ${loc.longitude.toFixed(4)}°Đ`;
+  }
+
+  const updateTimeEl = document.getElementById("detailUpdateTime");
+  if (updateTimeEl) {
+    updateTimeEl.textContent = `Cập nhật lúc: ${new Date().toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit" })}`;
+  }
 
   try {
     const weather = await fetchWeather(loc.latitude, loc.longitude, loc.cityName);
@@ -49,41 +83,46 @@ async function loadCityDetail(id) {
     // Nhãn UV
     const uvVal = daily.uv_index_max[0];
     const uvStatusEl = document.getElementById("uvStatus");
-    if (uvVal >= 8) {
-      uvStatusEl.innerHTML = `<span class="text-danger fw-bold">Rất cao - Tránh nắng</span>`;
-    } else if (uvVal >= 5) {
-      uvStatusEl.innerHTML = `<span class="text-warning fw-bold">Trung bình - Cần che chắn</span>`;
-    } else {
-      uvStatusEl.innerHTML = `<span class="text-success fw-bold">Mức an toàn</span>`;
+    if (uvStatusEl) {
+      if (uvVal >= 8) {
+        uvStatusEl.innerHTML = `<span class="text-danger fw-bold">Rất cao - Tránh nắng</span>`;
+      } else if (uvVal >= 5) {
+        uvStatusEl.innerHTML = `<span class="text-warning fw-bold">Trung bình - Cần che chắn</span>`;
+      } else {
+        uvStatusEl.innerHTML = `<span class="text-success fw-bold">Mức an toàn</span>`;
+      }
     }
 
     // Nhãn Độ ẩm
     const humStatusEl = document.getElementById("humidityStatus");
-    if (cur.relative_humidity_2m > 80) {
-      humStatusEl.textContent = "Độ ẩm cao, nồm ẩm";
-    } else if (cur.relative_humidity_2m < 50) {
-      humStatusEl.textContent = "Thời tiết hanh khô";
-    } else {
-      humStatusEl.textContent = "Mức độ thoải mái";
+    if (humStatusEl) {
+      if (cur.relative_humidity_2m > 80) {
+        humStatusEl.textContent = "Độ ẩm cao, nồm ẩm";
+      } else if (cur.relative_humidity_2m < 50) {
+        humStatusEl.textContent = "Thời tiết hanh khô";
+      } else {
+        humStatusEl.textContent = "Mức độ thoải mái";
+      }
     }
 
-    // Vẽ biểu đồ Chart.js sáng rõ
+    // Vẽ biểu đồ 24 giờ
     renderHourlyChart(hourly);
 
-    // Render danh sách 7 ngày kèm dải nhiệt độ Apple style
+    // Render danh sách 7 ngày
     render7DayForecast(daily);
 
     // Lời khuyên lối sống
     renderLifestyleAdvice(cur.weather_code, cur.temperature_2m, daily.uv_index_max[0]);
   } catch (err) {
-    console.error("Lỗi khi tải chi tiết thời tiết:", err);
+    console.error("Lỗi khi tải dữ liệu thời tiết:", err);
   }
 }
 
-// 2. Vẽ biểu đồ nhiệt độ 24 giờ phong cách Bright Daylight
+// 2. Vẽ biểu đồ nhiệt độ 24 giờ (Chart.js)
 function renderHourlyChart(hourly) {
-  const ctx = document.getElementById("hourlyChart").getContext("2d");
-  if (!ctx) return;
+  const chartCanvas = document.getElementById("hourlyChart");
+  if (!chartCanvas) return;
+  const ctx = chartCanvas.getContext("2d");
 
   if (hourlyChartInstance) {
     hourlyChartInstance.destroy();
@@ -96,7 +135,6 @@ function renderHourlyChart(hourly) {
 
   const temperatures = hourly.temperature_2m.slice(0, 24);
 
-  // Gradient màu trời xanh trong vắt
   const gradient = ctx.createLinearGradient(0, 0, 0, 250);
   gradient.addColorStop(0, "rgba(2, 132, 199, 0.28)");
   gradient.addColorStop(1, "rgba(2, 132, 199, 0.0)");
@@ -160,7 +198,7 @@ function renderHourlyChart(hourly) {
   });
 }
 
-// 3. Render 7 ngày tới với thanh dải nhiệt độ Apple Weather
+// 3. Render 7 ngày tới
 function render7DayForecast(daily) {
   const container = document.getElementById("sevenDayForecastList");
   if (!container) return;
@@ -192,7 +230,6 @@ function render7DayForecast(daily) {
             <span class="small text-secondary d-none d-sm-inline" style="max-width: 100px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${wmo.label}</span>
           </div>
 
-          <!-- Apple style horizontal temperature bar -->
           <div class="d-flex align-items-center gap-2">
             <span class="small text-primary fw-semibold">${minT}°</span>
             <div class="forecast-range-bar-track d-none d-sm-block">
@@ -206,7 +243,7 @@ function render7DayForecast(daily) {
   }).join("");
 }
 
-// 4. Khuyến nghị thông minh
+// 4. Khuyến nghị thời tiết
 function renderLifestyleAdvice(wmoCode, temp, uv) {
   const adviceEl = document.getElementById("lifestyleAdvice");
   if (!adviceEl) return;
@@ -230,14 +267,21 @@ function setupCityDropdown(currentId) {
   const container = document.getElementById("citySelectorDropdown");
   if (!container) return;
 
-  const locations = getLocations();
-  const optionsHtml = locations.map(loc => `
-    <li>
-      <a class="dropdown-item ${loc.id == currentId ? 'active fw-bold' : ''}" href="detail.html?id=${loc.id}">
-        ${loc.cityName} (Miền ${loc.region})
-      </a>
-    </li>
-  `).join("");
+  const contextPath = getContextPath();
+  const locations = (typeof getLocations === "function") ? getLocations() : [];
+
+  if (locations.length === 0) return;
+
+  const optionsHtml = locations.map(loc => {
+    const locId = loc.id || loc.locationId;
+    return `
+      <li>
+        <a class="dropdown-item ${locId == currentId ? 'active fw-bold' : ''}" href="${contextPath}/detail?id=${locId}">
+          ${loc.cityName} (${loc.region ? 'Miền ' + loc.region : (loc.regionName || '')})
+        </a>
+      </li>
+    `;
+  }).join("");
 
   container.innerHTML = `
     <div class="dropdown">
