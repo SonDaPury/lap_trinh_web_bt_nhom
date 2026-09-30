@@ -50,7 +50,6 @@ public class AdminLoginController extends HttpServlet {
         if (admin != null) {
             HttpSession session = request.getSession();
             session.setAttribute("adminUser", admin);
-            // Đăng nhập thành công -> redirect sang dashboard
             response.sendRedirect(request.getContextPath() + "/admin/dashboard");
         } else {
             request.setAttribute("errorMessage", "Tài khoản hoặc mật khẩu không chính xác!");
