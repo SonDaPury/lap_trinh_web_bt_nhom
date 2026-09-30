@@ -22,7 +22,6 @@ public class LocationController extends HttpServlet {
         locationDAO = new LocationDAO();
     }
 
-    // Xử lý Xóa qua URL: /admin/location?action=delete&id=...
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -35,7 +34,11 @@ public class LocationController extends HttpServlet {
         if ("delete".equalsIgnoreCase(action)) {
             try {
                 int id = Integer.parseInt(request.getParameter("id"));
-                locationDAO.deleteLocation(id);
+                boolean success = locationDAO.deleteLocation(id);
+                if (success) {
+                    request.getSession().setAttribute("toastMessage", "Đã xóa địa phương thành công!");
+                    request.getSession().setAttribute("toastType", "success");
+                }
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -43,7 +46,6 @@ public class LocationController extends HttpServlet {
         response.sendRedirect(request.getContextPath() + "/admin/dashboard");
     }
 
-    // Xử lý Thêm mới (create) và Cập nhật (update) từ Modal Form
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -61,7 +63,6 @@ public class LocationController extends HttpServlet {
         BigDecimal longitude = new BigDecimal(request.getParameter("longitude"));
         boolean isFeatured = "true".equalsIgnoreCase(request.getParameter("isFeatured"));
 
-        // Ánh xạ id vùng miền (1: Bắc, 2: Trung, 3: Nam)
         int regionId = 1;
         if (regionName.contains("Trung")) regionId = 2;
         else if (regionName.contains("Nam")) regionId = 3;
@@ -69,12 +70,19 @@ public class LocationController extends HttpServlet {
         if ("update".equalsIgnoreCase(action)) {
             int id = Integer.parseInt(request.getParameter("locationId"));
             Location loc = new Location(id, cityName, regionId, regionName, latitude, longitude, isFeatured);
-            locationDAO.updateLocation(loc);
+            boolean success = locationDAO.updateLocation(loc);
+            if (success) {
+                request.getSession().setAttribute("toastMessage", "Đã cập nhật thông tin \"" + cityName + "\" thành công!");
+                request.getSession().setAttribute("toastType", "success");
+            }
         } else {
             Location loc = new Location(cityName, regionId, latitude, longitude, isFeatured);
-            locationDAO.insertLocation(loc);
+            boolean success = locationDAO.insertLocation(loc);
+            if (success) {
+                request.getSession().setAttribute("toastMessage", "Đã thêm mới địa phương \"" + cityName + "\" thành công!");
+                request.getSession().setAttribute("toastType", "success");
+            }
         }
-
         response.sendRedirect(request.getContextPath() + "/admin/dashboard");
     }
 

@@ -82,7 +82,7 @@ function openAddModal() {
   document.getElementById("actionType").value = "create";
   document.getElementById("locationForm").reset();
   document.getElementById("geocodeHelperText").innerHTML = `
-    <i class="bi bi-lightbulb text-warning me-1"></i> Bấm "Tự lấy toạ độ" để tự động điền kinh độ/vĩ độ chuẩn qua Geocoding.
+    <i class="bi bi-lightbulb text-warning me-1"></i> Bấm "Tự lấy toạ độ" để tự động điền kinh độ/vĩ độ chuẩn.
   `;
 }
 

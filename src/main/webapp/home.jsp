@@ -77,9 +77,7 @@
                         </a>
                     </c:when>
                     <c:otherwise>
-                        <a href="${pageContext.request.contextPath}/admin/login" class="btn btn-spotlight-action px-3 py-2 fw-semibold">
-                            <i class="bi bi-shield-lock-fill me-1"></i> Quản trị (Admin)
-                        </a>
+
                     </c:otherwise>
                 </c:choose>
             </div>
@@ -125,11 +123,11 @@
                 <!-- Quick Trending Tags -->
                 <div class="d-flex flex-wrap align-items-center gap-2">
                     <span class="text-white-50 small me-1">Tìm nhanh:</span>
-                    <a href="${pageContext.request.contextPath}/?q=Hà+Nội" class="btn btn-sm btn-glass-pill py-1 px-3 text-white text-decoration-none">Hà Nội</a>
-                    <a href="${pageContext.request.contextPath}/?q=TP.+Hồ+Chí+Minh" class="btn btn-sm btn-glass-pill py-1 px-3 text-white text-decoration-none">TP. Hồ Chí Minh</a>
-                    <a href="${pageContext.request.contextPath}/?q=Đà+Lạt" class="btn btn-sm btn-glass-pill py-1 px-3 text-white text-decoration-none">Đà Lạt</a>
-                    <a href="${pageContext.request.contextPath}/?q=Đà+Nẵng" class="btn btn-sm btn-glass-pill py-1 px-3 text-white text-decoration-none">Đà Nẵng</a>
-                    <a href="${pageContext.request.contextPath}/?q=Sa+Pa" class="btn btn-sm btn-glass-pill py-1 px-3 text-white text-decoration-none">Sa Pa</a>
+                    <a href="${pageContext.request.contextPath}/?q=Hà+Nội" class="btn btn-sm btn-glass-pill py-1 px-3 text-decoration-none">Hà Nội</a>
+                    <a href="${pageContext.request.contextPath}/?q=TP.+Hồ+Chí+Minh" class="btn btn-sm btn-glass-pill py-1 px-3 text-decoration-none">TP. Hồ Chí Minh</a>
+                    <a href="${pageContext.request.contextPath}/?q=Đà+Lạt" class="btn btn-sm btn-glass-pill py-1 px-3 text-decoration-none">Đà Lạt</a>
+                    <a href="${pageContext.request.contextPath}/?q=Đà+Nẵng" class="btn btn-sm btn-glass-pill py-1 px-3 text-decoration-none">Đà Nẵng</a>
+                    <a href="${pageContext.request.contextPath}/?q=Sa+Pa" class="btn btn-sm btn-glass-pill py-1 px-3 text-decoration-none">Sa Pa</a>
                 </div>
             </div>
 

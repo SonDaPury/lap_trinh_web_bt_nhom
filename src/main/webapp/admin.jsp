@@ -36,7 +36,7 @@
                 <i class="bi bi-shield-lock-fill text-warning fs-4"></i>
             </div>
             <span class="fs-4 navbar-brand-logo">VietWeather <span
-                    class="badge bg-primary-subtle text-primary border border-primary-subtle fs-6 fw-normal rounded-pill ms-1">Admin Panel</span></span>
+                    class="badge text-primary border border-primary-subtle fs-6 fw-normal rounded-pill ms-1">Admin Panel</span></span>
         </a>
 
         <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#adminNavbar">
@@ -89,7 +89,6 @@
                         <h2 class="display-6 fw-bold mb-0 text-dark" id="statTotalLocations">
                             ${not empty totalLocations ? totalLocations : 0}
                         </h2>
-                        <span class="text-muted small">CSDL MySQL</span>
                     </div>
                     <div class="p-3 rounded-4 fs-2 d-flex align-items-center justify-content-center"
                          style="background: #e0f2fe; color: #0284c7; border: 1px solid #bae6fd;">
@@ -157,20 +156,15 @@
         <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
             <div>
                 <h4 class="fw-bold text-dark mb-1">
-                    <i class="bi bi-table text-primary me-2"></i>Danh Mục Địa Phương &amp; Toạ Độ (Locations CRUD)
+                    <i class="bi bi-table text-primary me-2"></i>Danh Mục Địa Phương &amp; Toạ Độ
                 </h4>
-                <p class="text-muted small mb-0">Quản lý thêm, sửa, xóa tỉnh/thành phố và cấu hình toạ độ gọi API
-                    Open-Meteo</p>
+                <p class="text-muted small mb-0">Quản lý thêm, sửa, xóa tỉnh/thành phố và cấu hình toạ độ</p>
             </div>
 
             <div class="d-flex flex-wrap align-items-center gap-2">
                 <button class="btn btn-outline-success rounded-pill py-2 px-3 fw-semibold small" id="exportCsvBtn"
                         title="Tải về file Excel/CSV">
                     <i class="bi bi-file-earmark-excel me-1"></i> Xuất CSV
-                </button>
-                <button class="btn btn-glass-pill py-2 px-3 fw-semibold small" id="resetDataBtn"
-                        title="Khôi phục danh sách mẫu">
-                    <i class="bi bi-arrow-counterclockwise me-1"></i> Khôi phục mẫu
                 </button>
                 <button class="btn btn-spotlight-action py-2 px-3 fw-semibold" data-bs-toggle="modal"
                         data-bs-target="#locationModal" onclick="openAddModal()">
@@ -203,7 +197,6 @@
             <table class="table admin-table-light align-middle">
                 <thead>
                 <tr>
-                    <th scope="col" style="width: 70px;">ID</th>
                     <th scope="col">Tỉnh / Thành phố</th>
                     <th scope="col">Vùng miền</th>
                     <th scope="col">Vĩ độ (Lat)</th>
@@ -217,7 +210,6 @@
                     <c:when test="${not empty locations}">
                         <c:forEach var="loc" items="${locations}">
                             <tr>
-                                <td class="fw-semibold text-muted">#${loc.locationId}</td>
                                 <td class="fw-bold text-dark">${loc.cityName}</td>
                                 <td>
                           <span class="badge ${loc.regionName == 'Miền Bắc' || loc.regionName == 'Bắc' ? 'bg-primary-subtle text-primary' : (loc.regionName == 'Miền Trung' || loc.regionName == 'Trung' ? 'bg-warning-subtle text-warning' : 'bg-success-subtle text-success')}">
@@ -299,7 +291,7 @@
                         </div>
                         <div class="form-text text-muted small mt-2" id="geocodeHelperText">
                             <i class="bi bi-lightbulb text-warning me-1"></i> Bấm "Tự lấy toạ độ" để tự động điền kinh
-                            độ/vĩ độ chuẩn qua Geocoding.
+                            độ/vĩ độ chuẩn.
                         </div>
                     </div>
 
@@ -335,7 +327,7 @@
                         <input class="form-check-input" type="checkbox" id="isFeaturedSwitch" name="isFeatured"
                                value="true" checked>
                         <label class="form-check-label fw-semibold text-dark small" for="isFeaturedSwitch">
-                            Hiển thị nổi bật ngoài trang chủ (is_featured = 1)
+                            Hiển thị nổi bật ngoài trang chủ
                         </label>
                     </div>
 
@@ -374,7 +366,7 @@
 </div>
 
 <!-- ================= TOAST NOTIFICATION ================= -->
-<div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 1080;">
+<div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 1080;">
     <div id="adminToast" class="toast align-items-center text-bg-success border-0 rounded-4 shadow-lg" role="alert">
         <div class="d-flex">
             <div class="toast-body fw-semibold text-white" id="toastMessage">
@@ -391,5 +383,33 @@
 <script src="${pageContext.request.contextPath}/static/js/weather-api.js"></script>
 <!-- Admin CRUD JS -->
 <script src="${pageContext.request.contextPath}/static/js/admin.js"></script>
+<c:if test="${not empty sessionScope.toastMessage}">
+    <%-- Thẻ ẩn chứa dữ liệu an toàn --%>
+    <div id="flashToastData"
+         data-message="<c:out value='${sessionScope.toastMessage}' />"
+         data-type="<c:out value='${not empty sessionScope.toastType ? sessionScope.toastType : "success"}' />"
+         class="d-none"></div>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        const toastEl = document.getElementById("adminToast");
+        const msgEl = document.getElementById("toastMessage");
+        const dataEl = document.getElementById("flashToastData");
+
+        if (toastEl && msgEl && dataEl) {
+          const toastType = dataEl.dataset.type || "success";
+          const message = dataEl.dataset.message;
+
+          toastEl.className = `toast align-items-center text-bg-${toastType} border-0 rounded-4 shadow-lg`;
+          msgEl.textContent = message;
+
+          const toast = new bootstrap.Toast(toastEl, { delay: 3500 });
+          toast.show();
+        }
+      });
+    </script>
+    <c:remove var="toastMessage" scope="session" />
+    <c:remove var="toastType" scope="session" />
+</c:if>
 </body>
 </html>

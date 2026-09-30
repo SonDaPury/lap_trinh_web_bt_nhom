@@ -38,20 +38,7 @@
             <a href="${pageContext.request.contextPath}/home" class="btn btn-glass-pill py-2 px-3 fw-semibold">
                 <i class="bi bi-arrow-left me-1"></i> Trang chủ
             </a>
-            <c:choose>
-                <c:when test="${not empty sessionScope.adminUser}">
-                    <a href="${pageContext.request.contextPath}/admin/dashboard"
-                       class="btn btn-spotlight-action py-2 px-3 fw-semibold">
-                        <i class="bi bi-speedometer2 me-1"></i> Quản trị
-                    </a>
-                </c:when>
-                <c:otherwise>
-                    <a href="${pageContext.request.contextPath}/admin/login"
-                       class="btn btn-spotlight-action py-2 px-3 fw-semibold">
-                        <i class="bi bi-shield-lock-fill me-1"></i> Quản trị
-                    </a>
-                </c:otherwise>
-            </c:choose>
+
         </div>
     </div>
 </nav>

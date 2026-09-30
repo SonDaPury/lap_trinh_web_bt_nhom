@@ -109,4 +109,30 @@ public class LocationDAO {
         }
         return false;
     }
+    public Location getLocationById(int id) {
+        String sql = "SELECT l.location_id, l.city_name, l.region_id, r.region_name, l.latitude, l.longitude, l.is_featured " +
+                "FROM locations l " +
+                "JOIN regions r ON l.region_id = r.region_id " +
+                "WHERE l.location_id = ?";
+        try (Connection conn = DBContext.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, id);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return new Location(
+                            rs.getInt("location_id"),
+                            rs.getString("city_name"),
+                            rs.getInt("region_id"),
+                            rs.getString("region_name"),
+                            rs.getBigDecimal("latitude"),
+                            rs.getBigDecimal("longitude"),
+                            rs.getBoolean("is_featured")
+                    );
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
 }
