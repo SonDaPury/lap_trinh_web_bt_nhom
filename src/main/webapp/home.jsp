@@ -84,6 +84,16 @@
         </div>
     </div>
 </nav>
+
+<!-- ================= EXTREME WEATHER ANNOUNCEMENT BAR ================= -->
+<div id="extremeWeatherAlertBanner" class="d-none w-100 py-2 shadow-sm" style="background-color: #ef4444; z-index: 1020; position: relative;">
+    <div class="container d-flex align-items-center text-white">
+        <marquee id="alertBannerMessage" class="mb-0 fw-medium fs-6" scrollamount="6" onmouseover="this.stop();" onmouseout="this.start();">
+            Đang theo dõi...
+        </marquee>
+        <button type="button" class="btn-close btn-close-white ms-3" onclick="dismissAlertBanner()" aria-label="Close" style="font-size: 0.8rem;"></button>
+    </div>
+</div>
 <!-- ================= MAIN CONTAINER ================= -->
 <main class="container my-4 my-md-5 position-relative" style="z-index: 1;">
 
@@ -144,28 +154,7 @@
         </div>
     </section>
 
-    <!-- EXTREME WEATHER ALERT BANNER -->
-    <div id="extremeWeatherAlertBanner"
-         class="alert bento-card border-0 mb-4 p-3 ${not empty weatherAlert ? '' : 'd-none'} animate-fade-in"
-         style="background: #fef2f2; border: 1.5px solid #fecaca !important;">
-        <div class="d-flex align-items-center justify-content-between">
-            <div class="d-flex align-items-center">
-                <div class="p-2 rounded-circle me-3 fs-5 d-flex align-items-center justify-content-center"
-                     style="background: #ef4444; width: 40px; height: 40px;">
-                    <i class="bi bi-exclamation-triangle-fill text-white"></i>
-                </div>
-                <div>
-                    <h6 class="fw-bold mb-0 text-danger" id="alertBannerTitle">
-                        <c:out value="${not empty alertTitle ? alertTitle : '⚠️ CẢNH BÁO KHÍ TƯỢNG ĐẶC BIỆT'}" />
-                    </h6>
-                    <p class="small mb-0 text-danger-emphasis" id="alertBannerMessage">
-                        <c:out value="${weatherAlert}" default="Đang theo dõi..." />
-                    </p>
-                </div>
-            </div>
-            <button type="button" class="btn-close" onclick="dismissAlertBanner()"></button>
-        </div>
-    </div>
+
 
     <!-- FILTER & TITLE SECTION -->
     <section id="weather-list-section" class="mb-4">
