@@ -19,7 +19,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
 // Lấy Context Path động của ứng dụng
 function getContextPath() {
-  return window.location.pathname.substring(0, window.location.pathname.indexOf("/", 2)) || "";
+  return (
+    window.location.pathname.substring(
+      0,
+      window.location.pathname.indexOf("/", 2),
+    ) || ""
+  );
 }
 
 // Lấy danh sách địa phương linh hoạt (Ưu tiên đọc từ JSP hoặc fallback sang weather-api.js)
@@ -38,7 +43,7 @@ function fetchActiveLocations() {
           regionName: opt.dataset.region || "Bắc",
           latitude: parseFloat(opt.dataset.lat),
           longitude: parseFloat(opt.dataset.lon),
-          isFeatured: true
+          isFeatured: true,
         });
       }
     }
@@ -60,8 +65,17 @@ function initHeroClock() {
 
   function update() {
     const now = new Date();
-    timeEl.textContent = now.toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
-    dateEl.textContent = now.toLocaleDateString("vi-VN", { weekday: "long", year: "numeric", month: "long", day: "numeric" });
+    timeEl.textContent = now.toLocaleTimeString("vi-VN", {
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+    });
+    dateEl.textContent = now.toLocaleDateString("vi-VN", {
+      weekday: "long",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
   }
   update();
   setInterval(update, 1000);
@@ -82,11 +96,15 @@ async function loadAllWeatherData() {
   `;
 
   try {
-    const promises = locations.map(async loc => {
-      const weather = await fetchWeather(loc.latitude, loc.longitude, loc.cityName);
+    const promises = locations.map(async (loc) => {
+      const weather = await fetchWeather(
+        loc.latitude,
+        loc.longitude,
+        loc.cityName,
+      );
       return {
         location: loc,
-        weather: weather
+        weather: weather,
       };
     });
 
@@ -112,10 +130,17 @@ function renderWeatherCards() {
   const noResultsAlert = document.getElementById("noResultsAlert");
   const contextPath = getContextPath();
 
-  const filtered = cachedWeatherList.filter(item => {
-    const reg = (item.location.region || item.location.regionName || "").replace("Miền ", "");
-    const matchRegion = currentFilterRegion === "ALL" || reg === currentFilterRegion;
-    const matchSearch = item.location.cityName.toLowerCase().includes(currentSearchQuery.toLowerCase());
+  const filtered = cachedWeatherList.filter((item) => {
+    const reg = (
+      item.location.region ||
+      item.location.regionName ||
+      ""
+    ).replace("Miền ", "");
+    const matchRegion =
+      currentFilterRegion === "ALL" || reg === currentFilterRegion;
+    const matchSearch = item.location.cityName
+      .toLowerCase()
+      .includes(currentSearchQuery.toLowerCase());
     return matchRegion && matchSearch;
   });
 
@@ -127,22 +152,23 @@ function renderWeatherCards() {
 
   noResultsAlert.classList.add("d-none");
 
-  gridEl.innerHTML = filtered.map(item => {
-    const loc = item.location;
-    const cur = item.weather.current;
-    const daily = item.weather.daily;
-    const wmo = getWMOInfo(cur.weather_code);
-    const locId = loc.id || loc.locationId;
-    const reg = (loc.region || loc.regionName || "").replace("Miền ", "");
+  gridEl.innerHTML = filtered
+    .map((item) => {
+      const loc = item.location;
+      const cur = item.weather.current;
+      const daily = item.weather.daily;
+      const wmo = getWMOInfo(cur.weather_code);
+      const locId = loc.id || loc.locationId;
+      const reg = (loc.region || loc.regionName || "").replace("Miền ", "");
 
-    let regionBadgeClass = "badge-region-bac";
-    if (reg === "Trung") regionBadgeClass = "badge-region-trung";
-    else if (reg === "Nam") regionBadgeClass = "badge-region-nam";
+      let regionBadgeClass = "badge-region-bac";
+      if (reg === "Trung") regionBadgeClass = "badge-region-trung";
+      else if (reg === "Nam") regionBadgeClass = "badge-region-nam";
 
-    const minT = Math.round(daily.temperature_2m_min[0]);
-    const maxT = Math.round(daily.temperature_2m_max[0]);
+      const minT = Math.round(daily.temperature_2m_min[0]);
+      const maxT = Math.round(daily.temperature_2m_max[0]);
 
-    return `
+      return `
       <div class="col-12 col-md-6 col-lg-4 animate-fade-in" id="card-city-${locId}">
         <div class="bento-card weather-city-card shadow-sm">
           <!-- Card Header: Region & Featured Tag -->
@@ -150,7 +176,7 @@ function renderWeatherCards() {
             <span class="badge-region ${regionBadgeClass}">
               <i class="bi bi-geo-alt me-1"></i> Miền ${reg}
             </span>
-            ${loc.isFeatured ? '<span class="badge rounded-pill px-2 py-1 small" style="background: #ffe4e6; color: #e11d48; border: 1px solid #fecdd3;"><i class="bi bi-star-fill me-1"></i> Tiêu biểu</span>' : ''}
+            ${loc.isFeatured ? '<span class="badge rounded-pill px-2 py-1 small" style="background: #ffe4e6; color: #e11d48; border: 1px solid #fecdd3;"><i class="bi bi-star-fill me-1"></i> Tiêu biểu</span>' : ""}
           </div>
 
           <!-- City & Coordinates -->
@@ -204,15 +230,22 @@ function renderWeatherCards() {
         </div>
       </div>
     `;
-  }).join("");
+    })
+    .join("");
 }
 
 // 4. Cập nhật số lượng đếm trên các Tab vùng miền
 function updateRegionCounts(locations) {
   const countAll = locations.length;
-  const countBac = locations.filter(l => (l.region || l.regionName || "").includes("Bắc")).length;
-  const countTrung = locations.filter(l => (l.region || l.regionName || "").includes("Trung")).length;
-  const countNam = locations.filter(l => (l.region || l.regionName || "").includes("Nam")).length;
+  const countBac = locations.filter((l) =>
+    (l.region || l.regionName || "").includes("Bắc"),
+  ).length;
+  const countTrung = locations.filter((l) =>
+    (l.region || l.regionName || "").includes("Trung"),
+  ).length;
+  const countNam = locations.filter((l) =>
+    (l.region || l.regionName || "").includes("Nam"),
+  ).length;
 
   document.getElementById("countAll").textContent = countAll;
   document.getElementById("countBac").textContent = countBac;
@@ -223,9 +256,9 @@ function updateRegionCounts(locations) {
 // 5. Cài đặt sự kiện bấm nút Lọc vùng miền
 function setupFilterEvents() {
   const filterBtns = document.querySelectorAll(".filter-pills .nav-link");
-  filterBtns.forEach(btn => {
+  filterBtns.forEach((btn) => {
     btn.addEventListener("click", () => {
-      filterBtns.forEach(b => b.classList.remove("active"));
+      filterBtns.forEach((b) => b.classList.remove("active"));
       btn.classList.add("active");
       currentFilterRegion = btn.getAttribute("data-region");
       renderWeatherCards();
@@ -262,7 +295,7 @@ function setupSearchEvents() {
 }
 
 // Quick Search Tag handler
-window.quickSearch = function(cityName) {
+window.quickSearch = function (cityName) {
   const searchInput = document.getElementById("searchInput");
   if (searchInput) {
     searchInput.value = cityName;
@@ -271,7 +304,7 @@ window.quickSearch = function(cityName) {
   }
 };
 
-window.resetSearch = function() {
+window.resetSearch = function () {
   const searchInput = document.getElementById("searchInput");
   if (searchInput) {
     searchInput.value = "";
@@ -280,7 +313,7 @@ window.resetSearch = function() {
   currentFilterRegion = "ALL";
 
   const filterBtns = document.querySelectorAll(".filter-pills .nav-link");
-  filterBtns.forEach(b => b.classList.remove("active"));
+  filterBtns.forEach((b) => b.classList.remove("active"));
   document.getElementById("filterAll")?.classList.add("active");
 
   renderWeatherCards();
@@ -305,19 +338,23 @@ function setupGeolocation() {
         const lat = pos.coords.latitude;
         const lon = pos.coords.longitude;
         btn.innerHTML = originalText;
-        alert(`📍 Đã định vị toạ độ GPS của bạn:\nVĩ độ: ${lat.toFixed(4)}, Kinh độ: ${lon.toFixed(4)}`);
+        alert(
+          `📍 Đã định vị toạ độ GPS của bạn:\nVĩ độ: ${lat.toFixed(4)}, Kinh độ: ${lon.toFixed(4)}`,
+        );
         document.getElementById("searchInput").value = "Hà Nội";
         currentSearchQuery = "Hà Nội";
         renderWeatherCards();
       },
       (err) => {
         btn.innerHTML = originalText;
-        alert("Không thể truy cập GPS hiện tại. Mặc định hiển thị dữ liệu thủ đô Hà Nội.");
+        alert(
+          "Không thể truy cập GPS hiện tại. Mặc định hiển thị dữ liệu thủ đô Hà Nội.",
+        );
         document.getElementById("searchInput").value = "Hà Nội";
         currentSearchQuery = "Hà Nội";
         renderWeatherCards();
       },
-      { timeout: 5000 }
+      { timeout: 5000 },
     );
   }
 
@@ -330,22 +367,42 @@ function checkExtremeWeatherAlerts() {
   const msgEl = document.getElementById("alertBannerMessage");
   if (!alertBanner || !msgEl) return;
 
-  const severeItems = cachedWeatherList.filter(item => {
+  const alerts = [];
+
+  cachedWeatherList.forEach((item) => {
     const code = item.weather.current.weather_code;
     const temp = item.weather.current.temperature_2m;
-    return code >= 80 || code === 95 || code === 96 || temp >= 35;
+    const cityName = item.location.cityName;
+
+    // Mưa dông lớn / Mưa rất to (WMO 65, 82, 95, 96, 99)
+    if ([65, 82, 95, 96, 99].includes(code)) {
+      alerts.push(
+        `<strong>${cityName}</strong>: Đang có mưa to / dông sét lớn.`,
+      );
+    }
+
+    // Nhiệt độ vượt ngưỡng an toàn (>= 38 hoặc <= 10)
+    if (temp >= 38) {
+      alerts.push(
+        `<strong>${cityName}</strong>: Nắng nóng cực đoan (${Math.round(temp)}°C).`,
+      );
+    } else if (temp <= 10) {
+      alerts.push(
+        `<strong>${cityName}</strong>: Rét đậm, nhiệt độ xuống thấp (${Math.round(temp)}°C).`,
+      );
+    }
   });
 
-  if (severeItems.length > 0) {
-    const cityNames = severeItems.map(i => i.location.cityName).join(", ");
-    msgEl.innerHTML = `Khu vực <strong>${cityNames}</strong> đang có thời tiết dông sét / mưa rào mạnh. Chú ý an toàn khi di chuyển ngoài trời.`;
+  if (alerts.length > 0) {
+    msgEl.innerHTML = alerts.join('&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;');
     alertBanner.classList.remove("d-none");
+    if (typeof msgEl.start === 'function') msgEl.start();
   } else {
     alertBanner.classList.add("d-none");
   }
 }
 
-window.dismissAlertBanner = function() {
+window.dismissAlertBanner = function () {
   document.getElementById("extremeWeatherAlertBanner")?.classList.add("d-none");
 };
 
@@ -365,14 +422,16 @@ function populateCompareDropdowns() {
   const select2 = document.getElementById("compareCity2");
   if (!select1 || !select2) return;
 
-  const locations = cachedWeatherList.map(item => item.location);
+  const locations = cachedWeatherList.map((item) => item.location);
   if (locations.length === 0) return;
 
-  const optionsHtml = locations.map(l => {
-    const id = l.id || l.locationId;
-    const reg = (l.region || l.regionName || "").replace("Miền ", "");
-    return `<option value="${id}">${l.cityName} (Miền ${reg})</option>`;
-  }).join("");
+  const optionsHtml = locations
+    .map((l) => {
+      const id = l.id || l.locationId;
+      const reg = (l.region || l.regionName || "").replace("Miền ", "");
+      return `<option value="${id}">${l.cityName} (Miền ${reg})</option>`;
+    })
+    .join("");
 
   select1.innerHTML = optionsHtml;
   select2.innerHTML = optionsHtml;
@@ -391,18 +450,35 @@ function renderComparisonResult() {
 
   if (!container || !val1 || !val2) return;
 
-  const item1 = cachedWeatherList.find(i => String(i.location.id || i.location.locationId) === String(val1));
-  const item2 = cachedWeatherList.find(i => String(i.location.id || i.location.locationId) === String(val2));
+  const item1 = cachedWeatherList.find(
+    (i) => String(i.location.id || i.location.locationId) === String(val1),
+  );
+  const item2 = cachedWeatherList.find(
+    (i) => String(i.location.id || i.location.locationId) === String(val2),
+  );
 
   if (!item1 || !item2) return;
 
-  const reg1 = (item1.location.region || item1.location.regionName || "").replace("Miền ", "");
-  const reg2 = (item2.location.region || item2.location.regionName || "").replace("Miền ", "");
+  const reg1 = (
+    item1.location.region ||
+    item1.location.regionName ||
+    ""
+  ).replace("Miền ", "");
+  const reg2 = (
+    item2.location.region ||
+    item2.location.regionName ||
+    ""
+  ).replace("Miền ", "");
 
   const wmo1 = getWMOInfo(item1.weather.current.weather_code);
   const wmo2 = getWMOInfo(item2.weather.current.weather_code);
 
-  const diffTemp = Math.round((item1.weather.current.temperature_2m - item2.weather.current.temperature_2m) * 10) / 10;
+  const diffTemp =
+    Math.round(
+      (item1.weather.current.temperature_2m -
+        item2.weather.current.temperature_2m) *
+        10,
+    ) / 10;
   let diffNotice = "";
   if (diffTemp > 0) {
     diffNotice = `<strong>${item1.location.cityName}</strong> ấm hơn <strong>${item2.location.cityName}</strong> khoảng ${Math.abs(diffTemp)}°C.`;
