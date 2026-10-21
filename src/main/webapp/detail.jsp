@@ -153,6 +153,41 @@
             </div>
         </div>
     </div>
+    <!-- AIR QUALITY INDEX (AQI) BENTO WIDGET -->
+    <section class="bento-card p-4 bg-white shadow-sm mb-4">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h5 class="fw-bold text-dark mb-0">
+          <i class="bi bi-lungs-fill text-success me-2"></i>Chất Lượng Không Khí (AQI)
+        </h5>
+        <span class="badge rounded-pill px-3 py-1 fs-6" id="aqiBadgeStatus">Đang nạp...</span>
+      </div>
+
+      <div class="row g-3 align-items-center">
+        <!-- Cột điểm số AQI chính -->
+        <div class="col-md-4 text-center text-md-start border-end">
+          <div class="display-4 fw-bold text-dark mb-0" id="aqiScore">--</div>
+          <div class="text-muted small" id="aqiDescription">Đang phân tích mẫu không khí...</div>
+        </div>
+
+        <!-- Cột bụi mịn PM2.5 & PM10 -->
+        <div class="col-md-8">
+          <div class="row g-3 text-center">
+            <div class="col-6">
+              <div class="p-3 bg-light rounded-3">
+                <span class="text-muted small d-block mb-1">Bụi mịn PM2.5</span>
+                <span class="fw-bold fs-5 text-dark" id="pm25Value">-- µg/m³</span>
+              </div>
+            </div>
+            <div class="col-6">
+              <div class="p-3 bg-light rounded-3">
+                <span class="text-muted small d-block mb-1">Bụi PM10</span>
+                <span class="fw-bold fs-5 text-dark" id="pm10Value">-- µg/m³</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
 
     <!-- ROW 2: 24-HOUR HOURLY CHART (CHART.JS) -->
     <section class="bento-card p-4 p-md-5 mb-4 bg-white shadow-sm">
@@ -218,11 +253,16 @@
     </div>
 </footer>
 
-<!-- Bootstrap JS Bundle -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-<!-- Weather API & Simulation Module -->
-<script src="${pageContext.request.contextPath}/static/js/weather-api.js"></script>
-<!-- Detail View JS -->
-<script src="${pageContext.request.contextPath}/static/js/detail.js"></script>
+<!-- 1. Bootstrap JS Bundle -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+  <!-- 2. Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- 3. weather-api.js PHẢI ĐỨNG TRƯỚC (chứa hàm fetchWeather, fetchAirQuality) -->
+  <script src="${pageContext.request.contextPath}/static/js/weather-api.js"></script>
+
+  <!-- 4. detail.js đứng sau cùng -->
+  <script src="${pageContext.request.contextPath}/static/js/detail.js"></script>
 </body>
 </html>

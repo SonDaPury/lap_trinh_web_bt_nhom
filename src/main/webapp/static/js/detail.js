@@ -113,6 +113,32 @@ async function loadCityDetail(id) {
 
     // Lời khuyên lối sống
     renderLifestyleAdvice(cur.weather_code, cur.temperature_2m, daily.uv_index_max[0]);
+    // ================= CHÈN ĐOẠN AQI TẠI ĐÂY =================
+    try {
+      const aqiData = await fetchAirQuality(loc.latitude, loc.longitude);
+      const curAqi = aqiData.current;
+      const aqiScore = curAqi.european_aqi;
+      const aqiLevel = getAQILevel(aqiScore);
+
+      const aqiScoreEl = document.getElementById("aqiScore");
+      const aqiBadgeEl = document.getElementById("aqiBadgeStatus");
+      const aqiDescEl = document.getElementById("aqiDescription");
+      const pm25El = document.getElementById("pm25Value");
+      const pm10El = document.getElementById("pm10Value");
+
+      if (aqiScoreEl) aqiScoreEl.textContent = aqiScore;
+      if (aqiBadgeEl) {
+        aqiBadgeEl.textContent = aqiLevel.label;
+        aqiBadgeEl.className = `badge rounded-pill px-3 py-1 fs-6 ${aqiLevel.bg} ${aqiLevel.class}`;
+      }
+      if (aqiDescEl) aqiDescEl.textContent = aqiLevel.desc;
+      if (pm25El) pm25El.textContent = `${curAqi.pm2_5} µg/m³`;
+      if (pm10El) pm10El.textContent = `${curAqi.pm10} µg/m³`;
+    } catch (aqiErr) {
+      console.warn("Không thể tải thông tin AQI:", aqiErr);
+      const aqiDescEl = document.getElementById("aqiDescription");
+      if (aqiDescEl) aqiDescEl.textContent = "Không có cảm biến đo AQI tại toạ độ này.";
+    }
   } catch (err) {
     console.error("Lỗi khi tải dữ liệu thời tiết:", err);
   }

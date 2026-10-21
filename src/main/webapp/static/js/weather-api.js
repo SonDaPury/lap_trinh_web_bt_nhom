@@ -540,3 +540,23 @@ function logoutAdmin() {
   localStorage.removeItem(ADMIN_STORAGE_KEY);
   window.location.href = "login.html";
 }
+async function fetchAirQuality(lat, lon) {
+  const url = `https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${lat}&longitude=${lon}&current=european_aqi,pm10,pm2_5`;
+  const res = await fetch(url);
+  if (!res.ok) throw new Error("Lỗi khi tải dữ liệu AQI");
+  return await res.json();
+}
+
+function getAQILevel(aqi) {
+  if (aqi <= 20) {
+    return { label: "Rất tốt", class: "text-success", bg: "bg-success-subtle", desc: "Không khí trong lành, rất an toàn." };
+  } else if (aqi <= 40) {
+    return { label: "Tốt", class: "text-info", bg: "bg-info-subtle", desc: "Chất lượng không khí ở mức chấp nhận được." };
+  } else if (aqi <= 60) {
+    return { label: "Trung bình", class: "text-warning", bg: "bg-warning-subtle", desc: "Nhóm nhạy cảm nên hạn chế ở ngoài lâu." };
+  } else if (aqi <= 80) {
+    return { label: "Kém", class: "text-danger", bg: "bg-danger-subtle", desc: "Nên đeo khẩu trang chống bụi khi ra đường." };
+  } else {
+    return { label: "Rất nguy hại", class: "text-danger fw-bold", bg: "bg-danger text-white", desc: "Cảnh báo khẩn cấp: Tránh vận động ngoài trời." };
+  }
+}
